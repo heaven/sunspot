@@ -12,7 +12,10 @@ Bundler.require(ENV['DB'])
 require File.expand_path('config/environment', ENV['RAILS_ROOT'])
 require 'rspec/rails'
 require 'rspec/autorun'
-require File.join('sunspot', 'rails', 'solr_logging')
+
+if RSolr::VERSION >= '2'
+  require File.join('sunspot', 'rails', 'solr_logging')
+end
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
@@ -61,6 +64,17 @@ RSpec.configure do |config|
     empty_tables
     Sunspot.remove_all!
   end  
+
+  # rspec-rails 3 will no longer automatically infer an example group's spec type
+  # from the file location. You can explicitly opt-in to the feature using this
+  # config option.
+  # To explicitly tag specs without using automatic inference, set the `:type`
+  # metadata manually:
+  #
+  #     describe ThingsController, :type => :controller do
+  #       # Equivalent to being in spec/controllers
+  #     end
+  config.infer_spec_type_from_file_location!
 end
 
 def empty_tables

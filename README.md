@@ -1,6 +1,6 @@
 # Sunspot
 
-[![Gem Version](https://badge.fury.io/rb/sunspot.png)](http://badge.fury.io/rb/sunspot)
+[![Gem Version](https://badge.fury.io/rb/sunspot.svg)](http://badge.fury.io/rb/sunspot)
 [![Build Status](https://secure.travis-ci.org/sunspot/sunspot.png?branch=master)](http://travis-ci.org/sunspot/sunspot)
 
 Sunspot is a Ruby library for expressive, powerful interaction with the Solr
@@ -256,6 +256,7 @@ Post.search do
   without(:category_ids, [1, 3])
   field_list [:title, :author_id]
 end
+```
 
 #### Disjunctions and Conjunctions
 
@@ -1254,8 +1255,18 @@ end
 TODO
 
 ## Type Reference
-
-TODO
+The following FieldTypes are used in sunspot. sunspot_solr will create schema.xml file inside Project for FieldType reference.
+* [Boolean](http://lucene.apache.org/solr/4_4_0/solr-core/org/apache/solr/schema/BoolField.html)
+* [SortableFloat](http://lucene.apache.org/solr/4_4_0/solr-core/org/apache/solr/schema/SortableFloatField.html)
+* [Date](http://lucene.apache.org/solr/4_4_0/solr-core/org/apache/solr/schema/DateField.html)
+* [SortableInt](http://lucene.apache.org/solr/4_4_0/solr-core/org/apache/solr/schema/SortableIntField.html)
+* [String](http://lucene.apache.org/core/4_4_0/core/org/apache/lucene/document/StringField.html)
+* [SortableDouble](http://lucene.apache.org/solr/4_5_1/solr-core/org/apache/solr/schema/SortableDoubleField.html)
+* [SortableLong](http://lucene.apache.org/solr/4_5_1/solr-core/org/apache/solr/schema/SortableLongField.html)
+* [TrieInteger](http://lucene.apache.org/solr/4_4_0/solr-core/org/apache/solr/schema/TrieIntField.html)
+* [TrieFloat](https://lucene.apache.org/solr/4_4_0/solr-core/org/apache/solr/schema/TrieFloatField.html)
+* [TrieInt](https://lucene.apache.org/solr/4_4_0/solr-core/org/apache/solr/schema/TrieIntField.html)
+* [LatlonField](http://lucene.apache.org/solr/4_4_0/solr-core/org/apache/solr/schema/LatLonType.html)
 
 ## Configuration
 
@@ -1400,7 +1411,6 @@ $ yardoc -o docs */lib/**/*.rb - README.md
 * [Using Sunspot, Websolr, and Solr on Heroku](http://mrdanadams.com/2012/sunspot-websolr-solr-heroku/) (mrdanadams)
 * [Full Text Searching with Solr and Sunspot](http://collectiveidea.com/blog/archives/2011/03/08/full-text-searching-with-solr-and-sunspot/) (Collective Idea)
 * [Full-text search in Rails with Sunspot](http://tech.favoritemedium.com/2010/01/full-text-search-in-rails-with-sunspot.html) (Tropical Software Observations)
-* [A Few Sunspot Tips](http://blog.trydionel.com/2009/11/19/a-few-sunspot-tips/) (spiral_code)
 * [Sunspot: A Solr-Powered Search Engine for Ruby](http://www.linux-mag.com/id/7341) (Linux Magazine)
 * [Sunspot Showed Me the Light](http://bennyfreshness.com/2010/05/sunspot-helped-me-see-the-light/) (ben koonse)
 * [RubyGems.org — A case study in upgrading to full-text search](http://blog.websolr.com/post/3505903537/rubygems-search-upgrade-1) (Websolr)
@@ -1414,7 +1424,6 @@ $ yardoc -o docs */lib/**/*.rb - README.md
 * [Default scope with Sunspot](http://www.cloudspace.com/blog/2010/01/15/default-scope-with-sunspot/) (Cloudspace)
 * [Index External Models with Sunspot/Solr](http://www.medihack.org/2011/03/19/index-external-models-with-sunspotsolr/) (Medihack)
 * [Testing with Sunspot and Cucumber](http://collectiveidea.com/blog/archives/2011/05/25/testing-with-sunspot-and-cucumber/) (Collective Idea)
-* [Testing Sunspot with Cucumber](http://blog.trydionel.com/2010/02/06/testing-sunspot-with-cucumber/) (spiral_code)
 * [Solr, and Sunspot](http://www.kuahyeow.com/2009/08/solr-and-sunspot.html) (YT!)
 * [The Saga of the Switch](http://web.archive.org/web/20100427135335/http://mrb.github.com/2010/04/08/the-saga-of-the-switch.html) (mrb -- includes comparison of Sunspot and Ultrasphinx)
 * [Conditional Indexing with Sunspot](http://mikepackdev.com/blog_posts/19-conditional-indexing-with-sunspot) (mikepack)

@@ -21,7 +21,7 @@ describe 'spellcheck' do
     search = Sunspot.search(Post) do
       keywords 'Closure'
     end
-    search.spellcheck_suggestions.should == {}
+    expect(search.spellcheck_suggestions).to eq({})
   end
 
   it 'returns the list of suggestions' do
@@ -29,9 +29,9 @@ describe 'spellcheck' do
       keywords 'Closure'
       spellcheck :count => 3
     end
-    search.spellcheck_suggestions['closure']['suggestion'].should == [
+    expect(search.spellcheck_suggestions['closure']['suggestion']).to eq([
       {'word'=>'clojure', 'freq'=>2}, {'word'=>'conjure', 'freq'=>1}
-    ]
+    ])
   end
 
   it 'returns suggestion with highest frequency' do
@@ -39,7 +39,7 @@ describe 'spellcheck' do
       keywords 'Closure'
       spellcheck :count => 3
     end
-    search.spellcheck_suggestion_for('closure').should == 'clojure'
+    expect(search.spellcheck_suggestion_for('closure')).to eq('clojure')
   end
 
   it 'returns suggestion without collation when only more popular is true' do
@@ -48,7 +48,7 @@ describe 'spellcheck' do
       spellcheck :count => 3, :only_more_popular => true, :collate => false
     end
 
-    search.spellcheck_suggestion_for('closure').should == 'clojure'
+    expect(search.spellcheck_suggestion_for('closure')).to eq('clojure')
   end
 
   context 'spellcheck collation' do
@@ -58,7 +58,7 @@ describe 'spellcheck' do
         keywords 'lojure developing'
         spellcheck :count => 3, :only_more_popular => true
       end
-      search.spellcheck_collation('lojure', 'developing').should == 'clojure developing'
+      expect(search.spellcheck_collation('lojure', 'developing')).to eq('clojure developing')
     end
 
     it 'returns Solr collation if terms are not provided' do
@@ -67,7 +67,52 @@ describe 'spellcheck' do
         keywords 'lojure developing'
         spellcheck :count => 3, :only_more_popular => true
       end
-      search.spellcheck_collation.should == 'clojure developer'
+      expect(search.spellcheck_collation).to eq('clojure developer')
+    end
+
+    it 'returns Solr collation if terms are not provided even for single word' do
+
+      search = Sunspot.search(Post) do
+        keywords 'lojure'
+        spellcheck :count => 3, :only_more_popular => true
+      end
+      expect(search.spellcheck_collation).to eq('clojure')
+    end
+
+    it 'returns Solr collation if terms are provided even for single word' do
+
+      search = Sunspot.search(Post) do
+        keywords 'lojure'
+        spellcheck :count => 3
+      end
+      expect(search.spellcheck_collation).to eq('clojure')
+    end
+
+    it 'returns Solr collation if terms are provided even for single word' do
+
+      search = Sunspot.search(Post) do
+        keywords 'lojure'
+        spellcheck :count => 3
+      end
+      expect(search.spellcheck_collation('lojure')).to eq('clojure')
+    end
+
+    it 'returns Solr collation if terms are provided even if single keyword is word' do
+
+      search = Sunspot.search(Post) do
+        keywords 'C++, lojure Developer'
+        spellcheck :count => 3
+      end
+      expect(search.spellcheck_collation).to eq('C++, clojure Developer')
+    end
+
+    it 'returns nil if terms are provided which varies from actual keywords' do
+
+      search = Sunspot.search(Post) do
+        keywords 'clojure'
+        spellcheck :count => 3
+      end
+      expect(search.spellcheck_collation('lojure')).to eq(nil)
     end
   end
 

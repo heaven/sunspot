@@ -1,7 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '~> 3.0.0'
-
+gem 'rails', '~> 5.0'
 if RUBY_VERSION < '2.1'
   gem 'nokogiri', '~> 1.6.8'
 end
@@ -11,9 +10,9 @@ gem 'sunspot_solr', :path => File.expand_path('../../../sunspot_solr', __FILE__)
 gem 'sunspot_rails', :path => File.expand_path('../..', __FILE__)
 
 group :test do
+  gem 'protected_attributes_continued'
   gem 'rspec-rails', '~> 2.99.0'
   gem 'progress_bar', '~> 1.0.5', require: false
-  gem 'test-unit', '~> 3.2.0' if RUBY_VERSION >= '2.2.0'
 end
 
 group :postgres do
