@@ -59,7 +59,9 @@ module Sunspot
       end
 
       def inspect
-        "<Sunspot::Search::StatsRow:#{value.inspect} min=#{min} max=#{max} count=#{count}>"
+        "<Sunspot::Search::StatsRow:#{value.inspect} min=#{min} max=#{max}"\
+        " count=#{self.count} sum=#{sum} missing=#{missing} sum_of_squares=#{sum_of_squares}"\
+        " mean=#{mean} standard_deviation=#{standard_deviation}>"
       end
     end
   end

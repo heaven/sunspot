@@ -1,7 +1,7 @@
 # Sunspot
 
 [![Gem Version](https://badge.fury.io/rb/sunspot.svg)](http://badge.fury.io/rb/sunspot)
-[![Build Status](https://secure.travis-ci.org/sunspot/sunspot.png?branch=master)](http://travis-ci.org/sunspot/sunspot)
+[![Build Status](https://secure.travis-ci.org/sunspot/sunspot.svg?branch=master)](http://travis-ci.org/sunspot/sunspot)
 
 Sunspot is a Ruby library for expressive, powerful interaction with the Solr
 search engine. Sunspot is built on top of the RSolr library, which
@@ -23,13 +23,13 @@ For questions about how to use Sunspot in your app, please use the
 ## Looking for maintainers
 This project is looking for maintainers. An ideal candidate would be someone on a team whose app makes heavy use of the Sunspot gem. If you think you're a good fit, send a message to contact@culturecode.ca.
 
-## Quickstart with Rails 3 / 4
+## Quickstart with Rails
 
 Add to Gemfile:
 
 ```ruby
 gem 'sunspot_rails'
-gem 'sunspot_solr' # optional pre-packaged Solr distribution for use in development
+gem 'sunspot_solr' # optional pre-packaged Solr distribution for use in development. Please find a section below explaining other options for running Solr in production
 ```
 
 Bundle it!
@@ -50,6 +50,19 @@ with:
 ```bash
 bundle exec rake sunspot:solr:start # or sunspot:solr:run to start in foreground
 ```
+
+This will generate a `/solr` folder with default configuration files and indexes.
+
+If you're using source control, it's recommended that the files generated for indexing and running (PIDs) are not checked in. You can do this by adding the following lines to `.gitignore`:
+
+```
+solr/data
+solr/test/data
+solr/development/data
+solr/default/data
+solr/pids
+```
+
 
 ## Setting Up Objects
 
@@ -526,6 +539,77 @@ Sunspot.search(Post) do
 end
 ```
 
+#### Json Facets
+
+The [json facet](http://yonik.com/json-facet-api/) can be used with the following syntaxt:
+
+```ruby
+Sunspot.search(Post) do
+  json_facet(:title)
+end
+```
+
+There are some options you can pass to the json facet:
+```
+:limit
+:minimum_count
+:sort
+:prefix
+```
+
+Some examples
+```ruby
+# limit the results to 10
+Sunspot.search(Post) do
+  json_facet(:title, limit: 10)
+end
+
+# returns only the results with a minimum count of 10
+Sunspot.search(Post) do
+  json_facet(:title, minimum_count: 10)
+end
+
+# sort by count
+Sunspot.search(Post) do
+  json_facet(:title, sort: :count)
+end
+
+# filter titles by prefix 't'
+Sunspot.search(Post) do
+  json_facet(:title, prefix: 't')
+end
+```
+
+#### Json Facet Distinct
+
+The [json facet count distinct](http://yonik.com/solr-count-distinct/) can be used with the following syntaxt:
+
+```ruby
+# Get posts with distinct title
+# available stategies: :unique, :hll
+Sunspot.search(Post) do
+  json_facet(:blog_id, distinct: { group_by: :title, strategy: :unique })
+end
+```
+
+#### Json Facet nested
+
+The [nested facets](http://yonik.com/solr-subfacets/) can be used with the following syntaxt:
+```ruby
+Sunspot.search(Post) do
+  json_facet(:title, nested: { field: :author_name } )
+end
+```
+
+You can nest the nested facet also recursively:
+```ruby
+Sunspot.search(Post) do
+  json_facet(:title, nested: { field: :author_name, nested: { field: :title } )
+end
+```
+
+Nested facets have the same options of json facets
+
 ### Ordering
 
 By default, Sunspot orders results by "score": the Solr-determined
@@ -634,6 +718,7 @@ Additional options are supported by the DSL:
 Post.search do
   group :blog_id_str do
     limit 3
+    ngroups false # If you don't need the total groups counter
   end
 end
 
@@ -935,6 +1020,20 @@ end
 Take care when requesting facets on a stats field, since all facet results are
 returned by Solr!
 
+#### Json facets stats
+```ruby
+search = Post.search do
+  stats :average_rating do
+    json_facet :featured
+  end
+end
+
+search.json_facet_stats(:featured).rows.each do |row|
+  puts "Minimum average rating for featured=#{row.value}: #{row.min}"
+end
+```
+
+
 #### Multiple stats and selective faceting
 
 ```ruby
@@ -1150,6 +1249,16 @@ Post.search.hits.each do |hit|
 end
 ```
 
+Please note that when you have stored fields declared, they all going to be retrieved from Solr every time,
+even if you dont really need them. You can reduce returned stored dataset by using field lists,
+or you can skip all of them entirely:
+
+```ruby
+Post.search do
+  without_stored_fields
+end
+```
+
 ## Hits vs. Results
 
 Sunspot simply stores the type and primary key of objects in Solr.
@@ -1318,72 +1427,24 @@ You may want to use SSL for production environments with a username and password
 
 You can examine the value of `Sunspot::Rails.configuration` at runtime.
 
+## Running Solr in production environment
+
+`sunspot_solr` gem is an easy and convenient way to start your development with Solr.
+However once you are ready to deploy your code to a production, consider using another options like
+[standalone](https://lucene.apache.org/solr/guide/installing-solr.html) or
+[docker](https://hub.docker.com/_/solr/) Solr setup
+
 ## Development
 
 ### Running Tests
 
-#### sunspot
-
-Install the required gem dependencies:
-
-```bash
-cd /path/to/sunspot/sunspot
-bundle install
-```
-
-Start a Solr instance on port 8983:
+To run all the specs just call `rake` from the library root folder.
+To run specs related to individual gems, consider using one of the following commands:
 
 ```bash
-bundle exec sunspot-solr start -p 8983
-# or `bundle exec sunspot-solr run -p 8983` to run in foreground
-```
-
-Run the tests:
-
-```bash
-bundle exec rake spec
-```
-
-If desired, stop the Solr instance:
-
-```bash
-bundle exec sunspot-solr stop
-```
-
-#### sunspot\_rails
-
-Install the gem dependencies for `sunspot`:
-
-```bash
-cd /path/to/sunspot/sunspot
-bundle install
-```
-
-Start a Solr instance on port 8983:
-
-```bash
-bundle exec sunspot-solr start -p 8983
-# or `bundle exec sunspot-solr run -p 8983` to run in foreground
-```
-
-Navigate to the `sunspot_rails` directory:
-
-```bash
-cd ../sunspot_rails
-```
-
-Run the tests:
-
-```bash
-rake spec # all Rails versions
-rake spec RAILS=3.1.1 # specific Rails version only
-```
-
-If desired, stop the Solr instance:
-
-```bash
-cd ../sunspot
-bundle exec sunspot-solr stop
+GEM=sunspot ci/travis.sh
+GEM=sunspot_rails ci/travis.sh
+GEM=sunspot_solr ci/travis.sh
 ```
 
 ### Generating Documentation
@@ -1421,10 +1482,9 @@ $ yardoc -o docs */lib/**/*.rb - README.md
 * [How to get full text search working with Sunspot](http://cookbook.hobocentral.net/recipes/57-how-to-get-full-text-search) (Hobo Cookbook)
 * [Full text search with Sunspot in Rails](http://web.archive.org/web/20120311015358/http://hemju.com/2011/01/04/full-text-search-with-sunspot-in-rails/) (hemju)
 * [Using Sunspot for Free-Text Search with Redis](http://masonoise.wordpress.com/2010/02/06/using-sunspot-for-free-text-search-with-redis/) (While I Pondered...)
-* [Default scope with Sunspot](http://www.cloudspace.com/blog/2010/01/15/default-scope-with-sunspot/) (Cloudspace)
+* [Default scope with Sunspot](http://www.cloudspace.com/blog/2010/01/15/default-scope-with-sunspot) (Cloudspace)
 * [Index External Models with Sunspot/Solr](http://www.medihack.org/2011/03/19/index-external-models-with-sunspotsolr/) (Medihack)
 * [Testing with Sunspot and Cucumber](http://collectiveidea.com/blog/archives/2011/05/25/testing-with-sunspot-and-cucumber/) (Collective Idea)
-* [Solr, and Sunspot](http://www.kuahyeow.com/2009/08/solr-and-sunspot.html) (YT!)
 * [The Saga of the Switch](http://web.archive.org/web/20100427135335/http://mrb.github.com/2010/04/08/the-saga-of-the-switch.html) (mrb -- includes comparison of Sunspot and Ultrasphinx)
 * [Conditional Indexing with Sunspot](http://mikepackdev.com/blog_posts/19-conditional-indexing-with-sunspot) (mikepack)
 * [Introduction to Full Text Search for Rails Developers](http://valve.github.io/blog/2014/02/22/rails-developer-guide-to-full-text-search-with-solr/) (Valve's)

@@ -1,54 +1,38 @@
 language: ruby
-cache: bundler
 sudo: false
+cache:
+  bundler: true
+  directories:
+    - sunspot/vendor/bundle
+    - sunspot_solr/vendor/bundle
+    - sunspot_rails/vendor/bundle
 
 rvm:
   - 1.9.3
   - 2.0.0
   - 2.1.0
-  - 2.3.1
+  - 2.3.4
+  - 2.4.3
+  - 2.5.0
+  - ruby-head
   # - rbx-2.0
   # - jruby
 
 env:
-  - GEM=sunspot RSOLR=1.1.2
-  - GEM=sunspot
-  - GEM=sunspot_rails RAILS=3.0.0
-  - GEM=sunspot_rails RAILS=3.1.0
-  - GEM=sunspot_rails RAILS=3.2.0
-  - GEM=sunspot_rails RAILS=4.0.0
-  - GEM=sunspot_rails RAILS=4.1.0
-  - GEM=sunspot_rails RAILS=4.2.0
-  - GEM=sunspot_rails RAILS=5.0
+  - GEM=sunspot UPDATE_FORMAT=xml
+  - GEM=sunspot UPDATE_FORMAT=json
+  - GEM=sunspot_rails
   - GEM=sunspot_solr
 
-# Limit the size of the matrix by only performing the most common builds
 matrix:
-  exclude:
-    # Not supporting Ruby 2.0 and Rails < 3
-    - rvm: 2.0.0
-      env: GEM=sunspot_rails RAILS=3.0.0
-    - rvm: 2.0.0
-      env: GEM=sunspot_rails RAILS=3.1.0
   allow_failures:
-    # SQLITE fails to load correctly on Travis in Ruby 2.0
-    - rvm: 2.0.0
-      env: GEM=sunspot_rails RAILS=3.2.0
-    - rvm: 2.0.0
-      env: GEM=sunspot_rails RAILS=4.0.0
-    - rvm: 2.0.0
-      env: GEM=sunspot_rails RAILS=4.1.0
-    - rvm: 2.0.0
-      env: GEM=sunspot_rails RAILS=4.2.0
-    # rails 5.0 doesn't work with rspec-rails-2.14.2 undefined method 'alias_method_chain'
-    - rvm: 1.9.3
-      env: GEM=sunspot_rails RAILS=5.0
-    - rvm: 2.0.0
-      env: GEM=sunspot_rails RAILS=5.0
-    - rvm: 2.1.0
-      env: GEM=sunspot_rails RAILS=5.0
-    - rvm: 2.3.1
-      env: GEM=sunspot_rails RAILS=5.0
+    - rvm: ruby-head
+
+before_install:
+  #  https://docs.travis-ci.com/user/languages/ruby/#bundler-20
+  - gem uninstall -v '>= 2' -i $(rvm gemdir)@global -ax bundler || true
+  - gem install bundler -v '< 2'
 
 script:
   - ci/travis.sh
+
